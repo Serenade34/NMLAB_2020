@@ -203,7 +203,7 @@ contract User is  Transaction{
         TransactionList[sellerAddress][personalNumber2] = transactionNumber;//設定訂單對應關係
         HowManyTransaction[sellerAddress] = personalNumber2; //更新賣家總訂單數（因為多一筆新訂單因此+1）
         //總交易量+1
-        transactionNumber+=1;
+        TransactionNumber+=1;
         ConsumerDatabase[tx.origin].wallet-=price;//扣款
         emit giveNewOrder(tx.origin,  sellerAddress);
     }

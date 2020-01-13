@@ -178,10 +178,12 @@ function SellerShopPage(props) {
             <Typography>{original_shopGoods[0].name} => {shopGoods[0].name}</Typography>
             <Typography>{original_shopGoods[1].name} => {shopGoods[1].name}</Typography>
             <Typography>{original_shopGoods[2].name} => {shopGoods[2].name}</Typography>
-            <Button color="primary" component={RouterLink} to='/dist/SellerShop' onClick={(event) => {props.onSubmitShop(event)}}>
+            <Button color="primary" component={RouterLink} to='/dist/SellerShop' onClick={(event) => {props.onSubmitShopImg(event);
+                                                                                                      props.onSubmitShop(event);}}>
                 Yes
             </Button>
-            <Button color="primary" component={RouterLink} to='/dist/SellerShop' onClick={(event) => {props.onSetShop(event,original_shopGoods)}}>
+            <Button color="primary" component={RouterLink} to='/dist/SellerShop' onClick={(event) => {props.onSetShopImg(event,original_shopData)
+                                                                                                      props.onSetShop(event,original_shopGoods)}}>
                 No
             </Button>
         </div>
@@ -247,7 +249,8 @@ const ConfirmPage = (props) => {
     else if(page == 'SellerShopPage') {
         return(
             <SellerShopPage shopGoods={shopGoods} original_shopGoods={original_shopGoods}
-                            onSubmitShop={props.onSubmitShop} onSetShop={props.onSetShop}/>
+                            onSubmitShop={props.onSubmitShop} onSetShop={props.onSetShop}
+                            onSubmitShopImg={props.onSubmitShopImg} onSetShopImg={props.onSetShopImg}/>
         );
     }
     else if(page == 'BuyerOrderPage') {

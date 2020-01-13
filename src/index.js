@@ -80,7 +80,7 @@ const shopsData = [
              {id: 2, name: 'French Fries', price: 60, img: Img_MCD_FrenchFries, sold_out: false},
              {id: 3, name: 'Big Mac', price: 90, img: Img_MCD_BigMac, sold_out: true}]
     },
-    {id: 1, name: "MOS", state: 'close', img: Img_MOS, disc: 'MOS\'s Discription', address: 'selleraddress2',
+    /*{id: 1, name: "MOS", state: 'close', img: Img_MOS, disc: 'MOS\'s Discription', address: 'selleraddress2',
      goods: [{id: 1, name: 'French Fries', price: 30, img: Img_MOS_FrenchFries, sold_out: false},
              {id: 2, name: 'Chicken Fillet', price: 60, img: Img_MOS_ChickenFillet, sold_out: false},
              {id: 3, name: 'Rice burger', price: 90, img: Img_MOS_RiceBurger, sold_out: false}]
@@ -100,7 +100,7 @@ const shopsData = [
              {id: 2, name: 'Seafood Pizza', price: 60, img: Img_PZH_SeafoodPizza, sold_out: false},
              {id: 3, name: 'Hawaiian Pizza', price: 90, img: Img_PZH_HawaiianPizza, sold_out: false}]
     },
-    /*{id: 6, name: 'PZH', state: 'open', img: Img_PZH, disc: 'PZH\'s Discription', address: 'selleraddress6',
+    {id: 6, name: 'PZH', state: 'open', img: Img_PZH, disc: 'PZH\'s Discription', address: 'selleraddress6',
      goods: [{id: 1, name: 'Mini Pizza', price: 30, img: Img_NPL_MiniPizza, sold_out: false},
              {id: 2, name: 'Fried Chicken', price: 60, img: Img_NPL_FriedChicken, sold_out: true},
              {id: 3, name: 'Supreme Pizza', price: 90, img: Img_NPL_SupremePizza, sold_out: false}]
@@ -164,7 +164,7 @@ class App extends React.Component {
                     location: '',
                     goods: [0, 0, 0]
             },
-            shopData:{id: 0, name: '', state: 'close', img: '', disc: '', address: '',
+            shopData:{id: 0, name: '', state: 'close', img: Img_good, disc: '', address: '',
                       goods: [{id: 1, name: 'Good1', price: 30, img: '', sold_out: false},
                               {id: 2, name: 'Good2', price: 60, img: '', sold_out: false},
                               {id: 3, name: 'Good3', price: 90, img: '', sold_out: false}]},
@@ -188,6 +188,8 @@ class App extends React.Component {
         this.handleUpdateOrder = this.handleUpdateOrder.bind(this);
         this.sellerAddressToShopData = this.sellerAddressToShopData.bind(this);
         this.handleSetShopGoods = this.handleSetShopGoods.bind(this);
+        this.handleChangeShopImg = this.handleChangeShopImg.bind(this);
+        this.handleSubmitChangeShopImg = this.handleSubmitChangeShopImg.bind(this);
         this.handleChangeGoodsName = this.handleChangeGoodsName.bind(this);
         this.handleSubmitChangeGoodsName = this.handleSubmitChangeGoodsName.bind(this);
         this.handleSetConfirmPage = this.handleSetConfirmPage.bind(this);
@@ -288,16 +290,14 @@ class App extends React.Component {
                 var i = 0;
                 while(notFound && i<userData.length) {
                     if(address == userData[i].address) {
-
-                        console.log(userData[i].address);
-
+                        
                         const OrderNumber = await UberEatContract.methods.getPersonalTxIDNumber(userData[i].address).call()
                         console.log(OrderNumber);
 
-                        for (var i = 1; i <= OrderNumber; i++) {
+                        for (var j = 1; j <= OrderNumber; j++) {
 
-                            const ordersList = await UberEatContract.methods.listOrder(userData[i].address, i).call()
-                            const goods = await UberEatContract.methods.listOrder2(userData[i].address, i).call()
+                            const ordersList = await UberEatContract.methods.listOrder(userData[i].address, j).call()
+                            const goods = await UberEatContract.methods.listOrder2(userData[i].address, j).call()
                         
                             console.log(ordersList);
                             console.log(goods);
@@ -385,8 +385,18 @@ class App extends React.Component {
                 this.state.userLogin = true;
                 if(this.state.user.type == 'seller') {
                     this.state.shopData = shopsData[this.sellerNameToShopId(userData[i].name)];
-                    this.state.shopGoods = shopsData[this.sellerNameToShopId(userData[i].name)].goods;                    
-                };
+                    this.state.shopGoods = shopsData[this.sellerNameToShopId(userData[i].name)].goods;
+                    
+                    const wallet = await this.state.UberEatContract.methods.checkWalletForSeller(userData[i].address).call()
+                    const Wallet = wallet.toNumber();
+                    console.log(Wallet);
+
+                }
+                else if(this.state.user.type == 'buyer') {
+                    const wallet = await this.state.UberEatContract.methods.checkWalletForConsumer(userData[i].address).call()
+                    const Wallet = wallet.toNumber();
+                    console.log(Wallet);
+                }
                 notFound = false;                
 
                 this.checkOrderList();
@@ -467,7 +477,7 @@ class App extends React.Component {
                 id: shopsData.length,
                 name: this.state.user.name,
                 state: 'close',
-                img: Img_NewShop,
+                img: Img_good,
                 disc: '',
                 address: this.state.user.address,
                 goods: this.state.shopGoods,
@@ -499,22 +509,14 @@ class App extends React.Component {
 
         const price = this.orderListToPrice(this.state.order.goods);
 
-        //const TransactionNumber = this.state.UberEatContract.methods.getTransactionOrder().call({ from: this.state.address }).then(result => result.toNumber());
-        /*const TransactionNumber = this.state.UberEatContract.methods.getTransactionOrder().call({ from: this.state.address });
-
+        const TransactionNumber = await this.state.UberEatContract.methods.getTransactionOrder().call({ from: this.state.address }).then(result => result.toNumber());
         console.log(TransactionNumber);
-        var notFound = true;
-        var i = 0;
-        var transactionNumber = 0;
-        while(notFound && i<100) {
-            if(i == TransactionNumber) {
-                transactionNumber = i;
-                notFound = false;
-            }
-            i++;
-        }*/       
 
-        this.state.UberEatContract.methods.giveOrder(orderData.length, this.state.order.dueTime, this.state.order.seller_address, this.state.order.goods[0], this.state.order.goods[1], this.state.order.goods[2], price, this.state.order.location ).send({ from: this.state.address });
+        this.state.UberEatContract.methods.giveOrder(TransactionNumber, this.state.order.dueTime, this.state.order.seller_address, this.state.order.goods[0], this.state.order.goods[1], this.state.order.goods[2], price, this.state.order.location ).send({ from: this.state.address });
+
+        /*const wallet = await this.state.UberEatContract.methods.checkWalletForConsumer(this.state.address).call()
+        const Wallet = wallet.toNumber();
+        console.log(Wallet);*/
 
         orderData.push(this.state.order);
 
@@ -617,7 +619,10 @@ class App extends React.Component {
         }
         else if (this.state.order.state == 3)
         {            
-            this.state.UberEatContract.methods.acceptOrder(this.state.order.id).send({ from: this.state.address });            
+            this.state.UberEatContract.methods.acceptOrder(this.state.order.id).send({ from: this.state.address });
+            /*const wallet = await this.state.UberEatContract.methods.checkWalletForSeller(this.state.address).call()
+            const Wallet = wallet.toNumber();
+            console.log(Wallet);*/         
         }
         else if (this.state.order.state == 4)
         {
@@ -709,6 +714,43 @@ class App extends React.Component {
         return shopGoods;
     }
 
+    //*new function
+    sellerNameToShopData(name) {
+        var i = 0;
+        var shopData = {id: 0, name: '', state: '', img: Img_good, disc: '', address: '',
+                        goods: [{id: 1, name: '', price: 30, img: '', sold_out: false},
+                                {id: 2, name: '', price: 60, img: '', sold_out: false},
+                                {id: 3, name: '', price: 90, img: '', sold_out: false}]
+                    }
+        var notFound = true;
+        while(i<shopsData.length && notFound) {
+            if(shopsData[i].name == name) {
+                shopData = shopsData[i];
+                notFound = false;
+            }
+            i++;
+        }
+        return shopData;
+    }
+
+    //*new function
+    handleChangeShopImg(event,shop) {
+        this.setState({shopData : shop});
+        console.log('Success Load TextField Data');
+    }
+
+    //*new function
+    handleSubmitChangeShopImg() {
+        var index = this.sellerNameToShopId(this.state.user.name);
+        console.log(this.state.shopData.img);
+        
+        this.state.UberEatContract.methods.changeSellerPhoto(this.state.address, this.state.shopData.img).send({ from: this.state.address });
+        
+        shopsData[index].img = this.state.shopData.img;
+        console.log('Success -- Shop image changes has save into shopsData')
+        console.log(shopsData);
+    }
+
     handleChangeGoodsName(event,goods) {
         this.setState({shopGoods : goods});
         console.log('Success Load TextField Data');
@@ -719,13 +761,11 @@ class App extends React.Component {
         var index = this.sellerNameToShopId(this.state.user.name);
 
         for (var i = 0; i <= 2; i++) {
-            if(shopsData[index].goods[i].img !== this.state.shopGoods[i].img)
             this.state.UberEatContract.methods.changeGoodsPhoto(this.state.address, i+1, this.state.shopGoods[i].img).send({ from: this.state.address });
         }
 
 
         for (var i = 0; i <= 2; i++) {
-            if(shopsData[index].goods[i].name !== this.state.shopGoods[i].name)
             this.state.UberEatContract.methods.changeGoodsName(this.state.address, i+1, this.state.shopGoods[i].name).send({ from: this.state.address });
         }
 
@@ -833,7 +873,9 @@ class App extends React.Component {
                 <div>
                     <SellerShopPage user={this.state.user}
                                     shopGoods = {this.state.shopGoods}
+                                    shopData = {this.state.shopData}
                                     onChangeName={this.handleChangeGoodsName}
+                                    onChangeShop={this.handleChangeShopImg}
                                     onSetPage={this.handleSetConfirmPage}/>
                 </div>
             )
@@ -878,6 +920,8 @@ class App extends React.Component {
                                  order={this.state.order}
                                  shopGoods={this.state.shopGoods}
                                  original_shopGoods={this.sellerNameToShopGoods(this.state.user.name)}
+                                 shopData={this.state.shopData}
+                                 original_shopData={this.sellerNameToShopData(this.state.user.name)}
                                  onSubmitAddUser={this.handleSubmitAddUser}
                                  onSubmitOrder={this.handleOrderSubmit}
                                  onSetOrder={this.handleSetOrder}
@@ -885,6 +929,8 @@ class App extends React.Component {
                                  onCheckOrder={this.checkOrderList}
                                  onSetShop={this.handleChangeGoodsName}
                                  onSubmitShop={this.handleSubmitChangeGoodsName}
+                                 onSetShopImg={this.handleChangeShopImg}
+                                 onSubmitShopImg={this.handleSubmitChangeShopImg}
                                  onGetPrice={this.orderListToPrice}
                                  onPay={this.handlePay}/>
                 </div>

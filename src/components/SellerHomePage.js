@@ -74,7 +74,7 @@ const SellerHomePage = (props) => {
               />
               <CardMedia
                 className={classes.media}
-                image={Img_SellerHome}
+                image={shopData.img}
                 title="FoodShop"
               />
               <CardContent>

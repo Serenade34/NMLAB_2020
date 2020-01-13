@@ -96,7 +96,23 @@ class SellerShopPage extends React.Component {
             <SellerShopContainer>
               <Grid style={{height: 500, overflow: 'auto',
                             marginTop: 32, marginLeft: '37%', padding: 20}}>
-
+                  <Card style={{maxWidth: 345}}>
+                    <CardHeader title={this.props.shopData.name}/>
+                    <CardMedia
+                      style={{height: 0,
+                              paddingTop: '56.25%',}}
+                      image={this.props.shopData.img}
+                      title="ShopImage"
+                    />
+                    <CardContent>
+                      <input
+                        accept="image/*"
+                        id="Shop image"
+                        multiple
+                        type="file"
+                      />
+                    </CardContent>
+                  </Card>
                   <Content goodName={this.props.shopGoods[0].name}
                            goodPrice={this.props.shopGoods[0].price}
                            shop_Img={this.props.shopGoods[0].img}>
@@ -171,6 +187,13 @@ class SellerShopPage extends React.Component {
                                                                         price: 90,
                                                                         img: './' + document.getElementById('Good3 image').files[0].name,
                                                                         sold_out: false}]);
+                                        this.props.onChangeShop(event,{ id: this.props.shopData.id,
+                                                                        name: this.props.shopData.name,
+                                                                        state: this.props.shopData.state,
+                                                                        img: './' + document.getElementById('Shop image').files[0].name,
+                                                                        disc: this.props.shopData.disc,
+                                                                        address: this.props.shopData.address,
+                                                                        goods: this.props.shopData.goods});
                                         this.props.onSetPage(event,'SellerShopPage');
                                         }}>
                     Change Goods Name
